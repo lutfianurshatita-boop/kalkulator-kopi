@@ -1,0 +1,371 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <title>Simulasi Penjadwalan Produksi Kopi Desa Nglurah</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+
+    <!-- Header -->
+    <header class="header">
+        <h1>☕Kalkulator Produksi Kopi</h1>
+        <p>Simulasi penjadwalan produksi kopi berbasis metode Maxplus</p>
+    </header>
+
+    <!-- Konten Utama -->
+    <main class="container">
+
+        <!-- Deskripsi -->
+        <section class="card center">
+            <h2>📌 Tentang Website</h2>
+            <p>
+            Website ini membantu petani kopi menyusun jadwal produksi per hari
+            mulai dari sortasi hingga pengemasan menggunakan metode Max-Plus,
+            agar proses lebih teratur dan dapat memprediksi waktu selesai produksi.
+            </p>
+        </section>
+
+    <section class="card center">
+      <h3>🔄 Alur Produksi Kopi</h3>
+
+      <div class="flowchart">
+
+        <div class="node">Penerimaan bahan baku biji kopi (Cherry)</div>
+        <div class="arrow">↓</div>
+
+        <div class="node">Penjemuran kopi (Cherry)</div>
+        <div class="arrow">↓</div>
+
+        <div class="node">Pengupasan kopi kering</div>
+        <div class="arrow">↓</div>
+
+        <div class="node">Sortasi biji kopi (Greenbean)</div>
+        <div class="arrow">↓</div>
+
+ <!-- CABANG -->
+        <div class="branch">
+          <div class="node small">Penyimpanan</div>
+          <div class="node small">Roasting</div>
+        </div>
+
+        <div class="arrow">↓</div>
+
+        <div class="node">Pembubukan kopi</div>
+        <div class="arrow">↓</div>
+
+        <div class="node">Pengemasan</div>
+        <div class="arrow">↓</div>
+
+        <div class="node">Pelabelan</div>
+
+      </div>
+    </section>
+
+    <!-- Tombol -->
+        <section class="card center">
+            <p>Mulai simulasi untuk melihat jadwal produksi kopi.</p>
+            <button id="btnMulai" class="btn">Mulai</button>
+        </section>
+
+    <!--Input-->    
+
+
+    <div id="inputSection" class="card hidden">
+        <h4>Input Kondisi Produksi Kopi</h4>
+
+        <label>Kelompok Kopi</label>
+        <select id="kelompok">
+            <option value="pilih">Pilih</option>
+            <option value="ngancar">Kopi Ngancar</option>
+            <option value="wangsul">Kopi Wangsul</option>
+            <option value="lawu">Kopi Omah Lawu</option>
+        </select>
+
+        <label>Metode Pascapanen</label>
+        <select id="metode">
+            <option value="pilih">Pilih</option>
+            <option value="honey">Honey</option>
+            <option value="fullwash">Full Wash</option>
+            <option value="natural">Natural</option>
+        </select>
+
+        <label>Jumlah Panen (kg)</label>
+        <input type="number" id="panen"placeholder="Contoh:25">
+
+        <label>Kondisi Cuaca</label>
+        <select id="cuaca">
+            <option value="cerah">Cerah</option>
+            <option value="mendung">Mendung</option>
+            <option value="hujan">Hujan</option>
+        </select>
+
+        <label>Kondisi Alat Produksi</label>
+        <select id="alat">
+            <option value="lengkap">Lengkap</option>
+            <option value="manual">Manual</option>
+        </select>
+
+<hr>
+
+    <h5>📅 Tanggal Mulai Tiap Proses (opsional)</h5>
+    <p style="font-size:13px">Isi jika sudah ada jadwal nyata</p>
+
+    <div class="grid">
+      <label>Sortasi Awal</label>
+      <input type="date" id="tgl_sortasi">
+
+      <label>Fermentasi</label>
+      <input type="date" id="tgl_fermentasi">
+
+      <label>Penjemuran</label>
+      <input type="date" id="tgl_penjemuran">
+
+      <label>Roasting</label>
+      <input type="date" id="tgl_roasting">
+
+      <label>Penggilingan</label>
+      <input type="date" id="tgl_giling">
+
+      <label>Pengemasan</label>
+      <input type="date" id="tgl_kemas">
+    </div>
+
+    <button id="btnSimulasi"type="button">Simulasikan Jadwal</button>
+    </div>
+
+    <!--Hasil-->
+    <div id="hasilSection" class="card hidden">
+        <h3>Jadwal Produksi Kopi (Hari)</h3>
+        <div id="ringkasanOutput"></div>
+
+        <table class="tabel" id="tabelJadwal">
+            <thead>
+        <tr>
+            <th>Tahap Produksi</th>
+            <th>Tanggal Mulai</th>
+            <th>Tanggal Selesai</th>
+            <th>Durasi</th>
+            <th>Durasi Kumulatif</th>
+            <th>Ketergantungan</th>
+            <th>Status</th>
+            <th>Catatan</th>
+        </tr>
+        </thead>
+        <tbody></tbody>
+  </table>
+
+<canvas id="grafik"></canvas>
+<button id="btnExport">Export ke Excel</button>
+
+</main>
+
+    <!--Footer-->
+    <footer class="footer">
+        <p>© 2026 | KKN 41 Nglurah – Simulasi Penjadwalan Produksi Kopi Berbasis Max-Plus</p>
+    </footer>
+
+    </div>
+
+    
+<script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<script>
+
+function tanggalDariHari(hariKe) {
+  const base = new Date("2026-01-01");
+  base.setDate(base.getDate() + hariKe - 1);
+
+  return base.toLocaleDateString("id-ID", {
+    day: "numeric",
+    month: "long",
+    year: "numeric"
+  });
+}
+
+function hariDariTanggal(tgl) {
+  if (!tgl) return null;
+  const start = new Date(tgl);
+  const base = new Date("2026-01-01");
+  return Math.floor((start - base) / (1000 * 60 * 60 * 24)) + 1;
+}
+
+document.getElementById("btnMulai").onclick = () => {
+  document.getElementById("inputSection").classList.remove("hidden");
+};
+
+document.getElementById("btnSimulasi").onclick = () => {
+
+  const metode = document.getElementById("metode").value;
+  const cuaca = document.getElementById("cuaca").value;
+  const alat = document.getElementById("alat").value;
+  const jumlah = parseInt(document.getElementById("panen").value);
+
+  if (!jumlah) {
+    alert("Masukkan jumlah panen terlebih dahulu!");
+    return;
+  }
+
+  // ===== PENENTUAN DURASI BERDASARKAN DATA WAWANCARA =====
+
+  let durasi = {};
+
+  // Sortasi awal (estimasi 1 hari)
+  durasi.sortasi = 1;
+
+  // Fermentasi tergantung metode
+  if (metode === "fullwash") durasi.fermentasi = 4;
+  else if (metode === "honey") durasi.fermentasi = 3;
+  else durasi.fermentasi = 2;
+
+  // Pengeringan paling lama → bottleneck
+  if (metode === "natural") {
+    if (cuaca === "cerah") durasi.penjemuran = 30;
+    else if (cuaca === "mendung") durasi.penjemuran = 40;
+    else durasi.penjemuran = 60;
+  }
+
+  if (metode === "fullwash") {
+    durasi.penjemuran = 16;
+  }
+
+  if (metode === "honey") {
+    durasi.penjemuran = 21;
+  }
+
+  // Roasting tergantung alat & jumlah (data wawancara)
+  if (alat === "lengkap") {
+    durasi.roasting = Math.ceil((25 * jumlah) / 60);
+  } else {
+    durasi.roasting = 1;
+  }
+
+  // Penggilingan 5 menit per kg
+  durasi.giling = Math.ceil((5 * jumlah) / 60);
+
+  // Pengemasan
+  durasi.kemas = 1;
+
+  // ===== MODEL MAX PLUS ALGEBRA =====
+
+  const tahapan = [
+    { nama: "Sortasi Awal", key: "sortasi", tgl: "tgl_sortasi" },
+    { nama: "Fermentasi", key: "fermentasi", tgl: "tgl_fermentasi" },
+    { nama: "Penjemuran", key: "penjemuran", tgl: "tgl_penjemuran" },
+    { nama: "Roasting", key: "roasting", tgl: "tgl_roasting" },
+    { nama: "Penggilingan", key: "giling", tgl: "tgl_giling" },
+    { nama: "Pengemasan", key: "kemas", tgl: "tgl_kemas" }
+  ];
+
+  let hasil = [];
+  let selesaiSebelumnya = 1;
+
+  tahapan.forEach(t => {
+
+    const tglInput = document.getElementById(t.tgl).value;
+    const hariInput = hariDariTanggal(tglInput);
+
+    // IMPLEMENTASI MAX-PLUS:
+    // Mulai proses = max(selesai sebelumnya, input user)
+
+    const mulai = Math.max(
+      selesaiSebelumnya,
+      hariInput ?? selesaiSebelumnya
+    );
+
+    const selesai = mulai + durasi[t.key] - 1;
+
+    selesaiSebelumnya = selesai + 1;
+
+    let catatan = "";
+
+    if (t.key === "penjemuran") {
+      catatan = "Tahap paling lama & tergantung cuaca";
+    }
+
+    hasil.push({
+      tahap: t.nama,
+      mulai,
+      selesai,
+      catatan
+    });
+  });
+
+  // ===== TAMPILKAN HASIL =====
+
+  const tbody = document.querySelector("#tabelJadwal tbody");
+  tbody.innerHTML = "";
+
+let kumulatif = 0;
+
+hasil.forEach((h, index) => {
+
+  const durasi = h.selesai - h.mulai + 1;
+  kumulatif += durasi;
+
+  let ketergantungan =
+    index === 0
+      ? "Mulai Produksi"
+      : "Setelah " + hasil[index - 1].tahap;
+
+  let status = "On Schedule";
+  if (durasi > 10) status = "Tahap Lama";
+
+  let catatan = "-";
+
+  if (h.tahap === "Penjemuran") {
+    catatan = "Sangat dipengaruhi cuaca";
+  }
+
+  if (h.tahap === "Fermentasi" && metode === "fullwash") {
+    catatan = "Metode fullwash membutuhkan waktu lebih lama";
+  }
+
+  if (h.tahap === "Roasting" && alat === "manual") {
+    catatan = "Proses lebih lambat karena alat manual";
+  }
+
+  tbody.innerHTML += `
+    <tr>
+      <td>${index + 1}</td>
+      <td>${h.tahap}</td>
+      <td>${tanggalDariHari(h,mulai)}</td>
+      <td>${tanggalDariHari(h.selesai)}</td>
+      <td>${dur} hari</td>
+      <td>${kumulatif} hari</td>
+      <td>${ketergantungan}</td>
+      <td>${status}</td>
+      <td>${catatan}</td>
+    </tr>
+  `;
+});
+
+
+  // Ringkasan output
+  const totalHari = hasil[hasil.length - 1].selesai;
+
+  document.getElementById("ringkasanOutput").innerHTML = `
+    <b>Total estimasi produksi selesai pada tanggal${totalHari}</b>
+  `;
+
+  document.getElementById("hasilSection").classList.remove("hidden");
+
+  // Export ke Excel
+const btnExport = document.getElementById("btnExport");
+
+   btnExport.onclick = () => {
+    XLSX.writeFile(
+      XLSX.utils.table_to_book(
+        document.getElementById("tabelJadwal")
+      ),
+      "jadwal_produksi_kopi.xlsx"
+    );
+  };
+};
+
+</script>
+
+</body>
+</html>
