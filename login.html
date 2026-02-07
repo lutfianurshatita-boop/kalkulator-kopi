@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <title>Login</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+
+<body class="login-body">
+
+  <div class="login-container">
+    <div class="login-card">
+
+      <h2>☕ Login</h2>
+
+      <form id="loginForm">
+
+        <div class="form-group">
+          <label>Email</label>
+          <input type="email" id="username" placeholder="email@gmail.com" required>
+        </div>
+
+        <div class="form-group password-group">
+          <label>Password</label>
+          <!-- default TEXT -->
+          <input type="text" id="password" placeholder="ketik password" required>
+          <span class="eye" id="togglePassword">👁</span>
+        </div>
+
+        <div class="form-options">
+          <label class="remember">
+            <input type="checkbox" checked>
+            Remember me
+          </label>
+          <a href="#">Lupakan password?</a>
+        </div>
+
+        <button type="submit" class="btn-login">Masuk</button>
+      </form>
+
+      <div class="divider">Or</div>
+
+      <div class="social-login">
+        <button class="social-btn google" id="googleLogin">
+          <img src="google.jpg" alt="Google">
+        </button>
+      </div>
+
+      <p class="signup-text">
+        Don't have an account?
+        <a href="#">Sign up</a>
+      </p>
+
+    </div>
+  </div>
+
+  <!-- LOGIN MANUAL + TOGGLE PASSWORD -->
+  <script>
+    // LOGIN MANUAL
+    document.getElementById("loginForm").addEventListener("submit", function(e){
+      e.preventDefault();
+
+      const user = document.getElementById("username").value;
+      const pass = document.getElementById("password").value;
+
+      if(user === "admin@gmail.com" && pass === "kopi123"){
+        window.location.href = "index.html";
+      } else {
+        alert("Email atau password salah!");
+      }
+    });
+
+    // TOGGLE PASSWORD
+    const toggle = document.getElementById("togglePassword");
+    const password = document.getElementById("password");
+
+    toggle.addEventListener("click", () => {
+      if (password.type === "text") {
+        password.type = "password";
+        toggle.textContent = "🙈";
+      } else {
+        password.type = "text";
+        toggle.textContent = "👁";
+      }
+    });
+  </script>
+
+  <!-- FIREBASE GOOGLE LOGIN -->
+  <script type="module">
+    import { initializeApp } from
+      "https://www.gstatic.com/firebasejs/10.7.0/firebase-app.js";
+
+    import { getAuth, signInWithPopup, GoogleAuthProvider }
+      from "https://www.gstatic.com/firebasejs/10.7.0/firebase-auth.js";
+
+    const firebaseConfig = {
+      apiKey: "API_KEY_KAMU",
+      authDomain: "PROJECT_ID.firebaseapp.com",
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+    const provider = new GoogleAuthProvider();
+
+    document.getElementById("googleLogin").addEventListener("click", () => {
+      signInWithPopup(auth, provider)
+        .then(() => {
+          window.location.href = "index.html";
+        })
+        .catch(() => {
+          alert("Login Google gagal");
+        });
+    });
+  </script>
+
+</body>
+</html>
